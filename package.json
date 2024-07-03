@@ -5,6 +5,8 @@
   "version": "0.1.0",
   "author": "Emmanuel Whyte <emmanueljjwhyte@gmail.com>",
   "dependencies": {
+    "@react-three/drei": "^9.107.0",
+    "@react-three/fiber": "^8.16.8",
     "gatsby": "^5.13.5",
     "gatsby-plugin-image": "^3.13.1",
     "gatsby-plugin-manifest": "^5.13.1",
@@ -12,7 +14,8 @@
     "gatsby-source-filesystem": "^5.13.1",
     "gatsby-transformer-sharp": "^5.13.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "three": "^0.165.0"
   },
   "devDependencies": {
     "prettier": "^2.8.8"
