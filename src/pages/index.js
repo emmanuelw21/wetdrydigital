@@ -1,49 +1,44 @@
-import React, { useRef } from 'react';
-import { Canvas } from '@react-three/fiber';
-import Avatar from '../components/Avatar';
-import BaseModel from '../components/BaseModel';
+import React, { useState, useEffect } from 'react';
+import loadable from '@loadable/component';
+import LoadingScreen from '../components/LoadingScreen';
 import ThirdPersonControls from '../components/ThirdPersonControls';
-import ControlsOverlay from '../components/ControlsOverlay';
+
+const Scene3D = loadable(() => import('../components/Scene3D'), {
+  fallback: <LoadingScreen />,
+});
 
 const IndexPage = () => {
-  const avatarRef = useRef();
+  const [isClient, setIsClient] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [avatarRef, setAvatarRef] = useState(null);
+  const [leftJoystick, setLeftJoystick] = useState(null);
+  const [rightJoystick, setRightJoystick] = useState(null);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return <LoadingScreen text="Initializing..." />;
+  }
 
   return (
     <>
-      <Canvas style={{ height: '100vh', width: '100vw' }} backgroundColor="lightblue">
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1} />
-        <BaseModel url="/models/environment.glb" />
-        <Avatar url="/models/face.glb" ref={avatarRef} />
-        <ThirdPersonControls avatarRef={avatarRef} maxHeight={10} />
-      </Canvas>
-      <ControlsOverlay />
+      {!isLoaded && <LoadingScreen text="Loading 3D Scene..." />}
+      <Scene3D 
+        onLoad={() => setIsLoaded(true)} 
+        setAvatarRef={setAvatarRef}
+        onJoystickMove={(id, movement) => id === 'left' ? setLeftJoystick(movement) : setRightJoystick(movement)}
+      />
+      {avatarRef && (
+        <ThirdPersonControls 
+          avatarRef={avatarRef} 
+          leftJoystick={leftJoystick}
+          rightJoystick={rightJoystick}
+        />
+      )}
     </>
   );
-};
-
-const controlsOverlayStyle = {
-  position: 'absolute',
-  bottom: '20px',
-  left: '20px',
-  zIndex: 1000,
-};
-
-const joystickStyle = {
-  width: '100px',
-  height: '100px',
-  borderRadius: '50%',
-  backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-};
-
-const joystickKnobStyle = {
-  width: '40px',
-  height: '40px',
-  borderRadius: '50%',
-  backgroundColor: 'rgba(255, 255, 255, 0.6)',
 };
 
 export default IndexPage;

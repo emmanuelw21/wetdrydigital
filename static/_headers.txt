@@ -1,0 +1,5 @@
+/environment.glb
+  Access-Control-Allow-Origin: *
+
+/face.glb
+  Access-Control-Allow-Origin: *

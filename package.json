@@ -5,16 +5,21 @@
   "version": "0.1.0",
   "author": "Emmanuel Whyte <emmanueljjwhyte@gmail.com>",
   "dependencies": {
+    "@loadable/component": "^5.16.4",
     "@react-three/drei": "^9.107.0",
     "@react-three/fiber": "^8.16.8",
     "gatsby": "^5.13.5",
     "gatsby-plugin-image": "^3.13.1",
     "gatsby-plugin-manifest": "^5.13.1",
+    "gatsby-plugin-react-helmet": "^6.13.1",
+    "gatsby-plugin-remove-serviceworker": "^1.0.0",
     "gatsby-plugin-sharp": "^5.13.1",
     "gatsby-source-filesystem": "^5.13.1",
     "gatsby-transformer-sharp": "^5.13.1",
     "react": "^18.2.0",
+    "react-device-detect": "^2.2.3",
     "react-dom": "^18.2.0",
+    "react-helmet": "^6.1.0",
     "three": "^0.165.0"
   },
   "devDependencies": {
