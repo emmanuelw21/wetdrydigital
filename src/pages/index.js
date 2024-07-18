@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import loadable from '@loadable/component';
 import LoadingScreen from '../components/LoadingScreen';
-import ThirdPersonControls from '../components/ThirdPersonControls';
 
 const Scene3D = loadable(() => import('../components/Scene3D'), {
   fallback: <LoadingScreen />,
@@ -10,12 +9,20 @@ const Scene3D = loadable(() => import('../components/Scene3D'), {
 const IndexPage = () => {
   const [isClient, setIsClient] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [avatarRef, setAvatarRef] = useState(null);
-  const [leftJoystick, setLeftJoystick] = useState(null);
-  const [rightJoystick, setRightJoystick] = useState(null);
 
   useEffect(() => {
     setIsClient(true);
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.margin = '';
+      document.body.style.padding = '';
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
   }, []);
 
   if (!isClient) {
@@ -23,21 +30,10 @@ const IndexPage = () => {
   }
 
   return (
-    <>
+    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
       {!isLoaded && <LoadingScreen text="Loading 3D Scene..." />}
-      <Scene3D 
-        onLoad={() => setIsLoaded(true)} 
-        setAvatarRef={setAvatarRef}
-        onJoystickMove={(id, movement) => id === 'left' ? setLeftJoystick(movement) : setRightJoystick(movement)}
-      />
-      {avatarRef && (
-        <ThirdPersonControls 
-          avatarRef={avatarRef} 
-          leftJoystick={leftJoystick}
-          rightJoystick={rightJoystick}
-        />
-      )}
-    </>
+      <Scene3D onLoad={() => setIsLoaded(true)} />
+    </div>
   );
 };
 

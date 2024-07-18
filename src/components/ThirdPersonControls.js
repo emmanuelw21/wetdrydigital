@@ -1,79 +1,136 @@
-import { useEffect, useRef } from 'react';
-import * as THREE from 'three';
+import { useEffect, useState } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { Vector3, Euler } from 'three';
 
-const ThirdPersonControls = ({ avatarRef, cameraRef, speed = 0.1, maxHeight = 10 }) => {
-  const moveForward = useRef(false);
-  const moveBackward = useRef(false);
-  const moveLeft = useRef(false);
-  const moveRight = useRef(false);
-  const moveUp = useRef(false);
-  const moveDown = useRef(false);
+const ThirdPersonControls = ({ avatarRef, speed = 0.1, maxHeight = 10, joystickMove }) => {
+  const { camera } = useThree();
+  const [moveForward, setMoveForward] = useState(false);
+  const [moveBackward, setMoveBackward] = useState(false);
+  const [moveLeft, setMoveLeft] = useState(false);
+  const [moveRight, setMoveRight] = useState(false);
+  const [moveUp, setMoveUp] = useState(false);
+  const [moveDown, setMoveDown] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       switch (event.key) {
-        case 'w': moveForward.current = true; break;
-        case 's': moveBackward.current = true; break;
-        case 'a': moveLeft.current = true; break;
-        case 'd': moveRight.current = true; break;
-        case 'q': moveUp.current = true; break;
-        case 'z': moveDown.current = true; break;
-        default: break;
+        case 'w':
+        case 'ArrowUp':
+          event.preventDefault(); // Prevent default scrolling
+          setMoveForward(true);
+          break;
+        case 's':
+        case 'ArrowDown':
+          event.preventDefault(); // Prevent default scrolling
+          setMoveBackward(true);
+          break;
+        case 'a':
+        case 'ArrowLeft':
+          event.preventDefault(); // Prevent default scrolling
+          setMoveLeft(true);
+          break;
+        case 'd':
+        case 'ArrowRight':
+          event.preventDefault(); // Prevent default scrolling
+          setMoveRight(true);
+          break;
+        case 'q':
+          setMoveUp(true);
+          break;
+        case 'z':
+          setMoveDown(true);
+          break;
+        default:
+          break;
       }
     };
 
     const handleKeyUp = (event) => {
       switch (event.key) {
-        case 'w': moveForward.current = false; break;
-        case 's': moveBackward.current = false; break;
-        case 'a': moveLeft.current = false; break;
-        case 'd': moveRight.current = false; break;
-        case 'q': moveUp.current = false; break;
-        case 'z': moveDown.current = false; break;
-        default: break;
+        case 'w':
+        case 'ArrowUp':
+          setMoveForward(false);
+          break;
+        case 's':
+        case 'ArrowDown':
+          setMoveBackward(false);
+          break;
+        case 'a':
+        case 'ArrowLeft':
+          setMoveLeft(false);
+          break;
+        case 'd':
+        case 'ArrowRight':
+          setMoveRight(false);
+          break;
+        case 'q':
+          setMoveUp(false);
+          break;
+        case 'z':
+          setMoveDown(false);
+          break;
+        default:
+          break;
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
+    // Use keydown event listener with 'capture' phase
+    window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('keyup', handleKeyUp);
 
-    const animate = () => {
-      if (avatarRef.current && cameraRef.current) {
-        const avatar = avatarRef.current;
-        const camera = cameraRef.current;
-
-        const direction = new THREE.Vector3();
-
-        if (moveForward.current) direction.z -= 1;
-        if (moveBackward.current) direction.z += 1;
-        if (moveLeft.current) direction.x -= 1;
-        if (moveRight.current) direction.x += 1;
-        if (moveUp.current) direction.y += 1;
-        if (moveDown.current) direction.y -= 1;
-
-        direction.normalize().multiplyScalar(speed);
-        direction.applyQuaternion(avatar.quaternion);
-        avatar.position.add(direction);
-
-        if (avatar.position.y > maxHeight) avatar.position.y = maxHeight;
-        if (avatar.position.y < 0) avatar.position.y = 0;
-
-        const offset = new THREE.Vector3(0, 2, -5);
-        offset.applyQuaternion(avatar.quaternion);
-        camera.position.copy(avatar.position).add(offset);
-        camera.lookAt(avatar.position);
-      }
-
-      requestAnimationFrame(animate);
-    };
-
-    animate();
-
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [avatarRef, cameraRef, speed, maxHeight]);
+  }, []);
+
+  useFrame(() => {
+    if (!avatarRef.current) return;
+
+    const direction = new Vector3();
+    const avatarRotation = avatarRef.current.rotation.y;
+
+    if (moveForward) {
+      direction.z -= 1;
+    }
+    if (moveBackward) {
+      direction.z += 1;
+    }
+    if (moveLeft) {
+      direction.x -= 1;
+    }
+    if (moveRight) {
+      direction.x += 1;
+    }
+    if (moveUp) {
+      direction.y += 1;
+    }
+    if (moveDown && avatarRef.current.position.y > 0) {
+      direction.y -= 1;
+    }
+
+    // Apply joystick movement
+    if (joystickMove) {
+      direction.x += joystickMove.deltaX / 50;
+      direction.z += joystickMove.deltaY / 50;
+    }
+
+    direction.applyAxisAngle(new Vector3(0, 1, 0), avatarRotation);
+    direction.normalize().multiplyScalar(speed);
+    avatarRef.current.position.add(direction);
+
+    if (avatarRef.current.position.y > maxHeight) {
+      avatarRef.current.position.y = maxHeight;
+    }
+    if (avatarRef.current.position.y < 0) {
+      avatarRef.current.position.y = 0;
+    }
+
+    const offset = new Vector3(0, 2, -5);
+    const rotatedOffset = offset.applyEuler(new Euler(0, avatarRotation, 0));
+    camera.position.copy(avatarRef.current.position).add(rotatedOffset);
+    camera.lookAt(avatarRef.current.position);
+  });
 
   return null;
 };

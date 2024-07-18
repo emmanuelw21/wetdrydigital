@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import * as THREE from 'three';
 
 const DesktopControls = ({ controlsRef }) => {
-  // UPDATED: Increased speed range for more noticeable changes
   const [speed, setSpeed] = useState(0.3);
   const [verticalSpeed, setVerticalSpeed] = useState(0.14);
   const [showSettings, setShowSettings] = useState(false);
@@ -15,15 +13,23 @@ const DesktopControls = ({ controlsRef }) => {
 
       switch (event.key) {
         case 'w':
+        case 'ArrowUp':
+          event.preventDefault();
           controls.moveForward(speed);
           break;
         case 's':
+        case 'ArrowDown':
+          event.preventDefault();
           controls.moveForward(-speed);
           break;
         case 'a':
+        case 'ArrowLeft':
+          event.preventDefault();
           controls.moveRight(-speed);
           break;
         case 'd':
+        case 'ArrowRight':
+          event.preventDefault();
           controls.moveRight(speed);
           break;
         case 'q':
@@ -51,12 +57,12 @@ const DesktopControls = ({ controlsRef }) => {
     };
   }, [controlsRef, speed, verticalSpeed]);
 
-  // UPDATED: Settings component for desktop speed adjustment
+  // Settings component remains the same
   const Settings = () => (
     <div style={{position: 'absolute', top: '70px', left: '10px', background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '5px'}}>
       <h3 style={{color: 'white'}}>Settings</h3>
       <label style={{color: 'white', display: 'block', marginBottom: '10px'}}>
-        WASD Speed: {speed.toFixed(2)}
+        WASD/Arrow Speed: {speed.toFixed(2)}
       </label>
       <input 
         type="range" 
