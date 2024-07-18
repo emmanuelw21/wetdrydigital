@@ -10,7 +10,7 @@ const Scene3D = ({ onLoad }) => {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
-  const controlsRef = useRef(null);  // ADDED: Reference for PointerLockControls
+  const controlsRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -21,13 +21,12 @@ const Scene3D = ({ onLoad }) => {
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     cameraRef.current = camera;
-    camera.position.set(0, 1.7, 0);  // CHANGED: Set initial camera height to approximate eye level
+    camera.position.set(0, 1.7, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     mountRef.current.appendChild(renderer.domElement);
 
-    // CHANGED: Replace OrbitControls with PointerLockControls
     const controls = new PointerLockControls(camera, renderer.domElement);
     controlsRef.current = controls;
     scene.add(controls.getObject());
@@ -41,10 +40,10 @@ const Scene3D = ({ onLoad }) => {
 
     const loader = new GLTFLoader();
 
-    const baseUrl = 'https://wetdrydigital.netlify.app';
+    const baseUrl = 'https://cdn.jsdelivr.net/gh/emmanuelw21/wetdrydigital';
 
     loader.load(
-      `${baseUrl}/environment.glb`,
+      `${baseUrl}/static/environment.glb`,
       (gltf) => {
         scene.add(gltf.scene);
         setIsLoading(false);
@@ -79,7 +78,6 @@ const Scene3D = ({ onLoad }) => {
     };
   }, [onLoad]);
 
-  // CHANGED: Updated handleJoystickMove for FPS-style movement
   const handleJoystickMove = (joystickId, movement) => {
     if (!controlsRef.current) return;
 
@@ -87,21 +85,18 @@ const Scene3D = ({ onLoad }) => {
     const controls = controlsRef.current;
 
     if (joystickId === 'left') {
-      // Move the camera
       const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(controls.getObject().quaternion);
       const right = new THREE.Vector3(1, 0, 0).applyQuaternion(controls.getObject().quaternion);
 
       controls.getObject().position.add(forward.multiplyScalar(-movement.deltaY * speed));
       controls.getObject().position.add(right.multiplyScalar(movement.deltaX * speed));
     } else if (joystickId === 'right') {
-      // Rotate the camera
       controls.getObject().rotation.y -= movement.deltaX * 0.02;
       controls.getObject().children[0].rotation.x -= movement.deltaY * 0.02;
       controls.getObject().children[0].rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, controls.getObject().children[0].rotation.x));
     }
   };
 
-  // CHANGED: Updated handleVerticalMovement for smooth up/down movement
   const handleVerticalMovement = (direction, pressed) => {
     if (!controlsRef.current) return;
 
